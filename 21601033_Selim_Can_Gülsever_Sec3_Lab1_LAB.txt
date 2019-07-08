@@ -1,0 +1,389 @@
+######################################################################################################
+##############################################PROGRAM 1###############################################
+######################################################################################################
+##
+## Program1.asm - prints out "hello world"
+##
+##	a0 - points to the string
+##
+
+#################################
+#				#
+#		text segment	#
+#				#
+#################################
+
+	.text		
+	.globl __start 
+
+__start:		# execution starts here
+	la $a0,str	# put string address into a0
+	li $v0,4	# system call to print
+	syscall	#   out a string
+
+	li $v0,10  # system call to exit
+	syscall	#    bye bye
+
+
+#################################
+#				#
+#     	 data segment		#
+#				#
+#################################
+
+	.data
+str:	.asciiz "hello world Ali Can\n"
+n:	.word	10
+
+##
+## end of file Program1.asm
+
+######################################################################################################
+##############################################PROGRAM 2###############################################
+######################################################################################################
+##
+## Program2.asm asks user for temperature in Celsius,
+##  converts to Fahrenheit, prints the result.
+##
+##	v0 - reads in Celsius
+##	t0 - holds Fahrenheit result
+##	a0 - points to output strings
+##
+
+#################################
+#					 	#
+#		text segment		#
+#						#
+#################################
+
+	.text		
+	.globl __start	
+
+__start:
+	la $a0,prompt	# output prompt message on terminal
+	li $v0,4		# syscall 4 prints the string
+	syscall
+
+	li $v0, 5		# syscall 5 reads an integer
+	syscall
+
+	mul $t0,$v0,9	# to convert,multiply by 9,
+	div $t0,$t0,5	# divide by 5, then
+	add $t0,$t0,32	# add 32
+
+	la $a0,ans1	# print string before result
+	li $v0,4
+	syscall
+
+	move $a0,$t0	# print integer result
+	li $v0,1		# using syscall 1
+	syscall
+
+	la $a0,endl	# system call to print
+	li $v0,4		# out a newline
+	syscall
+
+	li $v0,10		# system call to exit
+	syscall		#    bye bye
+
+
+#################################
+#					 	#
+#     	 data segment		#
+#						#
+#################################
+
+	.data
+prompt:	.asciiz "Enter temperature (Celsius): "
+ans1:		.asciiz "The temperature in Fahrenheit is "
+endl:		.asciiz "\n"
+
+##
+## end of file Program2.asm
+
+######################################################################################################
+##############################################PROGRAM 3###############################################
+######################################################################################################
+##
+##	Program3.asm is a loop implementation
+##	of the Fibonacci function
+##        
+.data
+	endl:	.asciiz "\n"
+
+.text		
+.globl __start
+ 
+__start:			# execution starts here
+	li $a0,7		# to calculate fib(7)
+	jal fib		# call fib
+	move $a0,$v0	# print result
+	li $v0, 1
+	syscall
+
+	la $a0,endl		# print newline
+	li $v0,4
+	syscall
+
+	li $v0,10
+	syscall		# bye bye
+
+#------------------------------------------------
+
+
+fib:	move $v0,$a0	# initialise last element
+	ble $a0,2,done	# fib(0)=0, fib(1)=1
+
+	li $t0,0		# second last element
+	li $v0,1		# last element
+
+loop:	add  $t1,$t0,$v0	# get next value
+	move $t0,$v0	# update second last
+	move $v0,$t1	# update last element
+	subi $a0,$a0,1	# decrement count
+	bgt  $a0,1,loop	# exit loop when count=1
+done:	jr $ra
+
+## end of Program3.asm
+
+######################################################################################################
+############################################ PART 4    ###############################################
+######################################################################################################
+.data
+	baseMes: .asciiz "The calculation is (a+3b) * (c+2) / 4\n"
+	message: .asciiz "Enter an integer for a: "
+	message2: .asciiz "Enter an integer for b: "
+	message3: .asciiz "Enter an integer for c: "
+	newSpace: .asciiz " "
+	newLine:  .asciiz "\n"
+.text
+
+	li $v0, 4
+	la $a0, baseMes # printing message to the user
+	syscall
+
+	li $v0, 4
+	la $a0, message # printing message to the user
+	syscall
+	
+	li $v0, 5 #getting the integer input
+	syscall
+	
+	move $t0, $v0
+	
+	li $v0, 4
+	la $a0, message2 # printing message to the user
+	syscall
+	
+	li $v0, 5 #getting the integer input
+	syscall
+	
+	move $t1, $v0
+	
+	li $v0, 4
+	la $a0, message3 # printing message to the user
+	syscall
+	
+	li $v0, 5 #getting the integer input
+	syscall
+	
+	move $t2, $v0
+	
+	mul $t1, $t1, 3
+	add $t0, $t0, $t1
+	addi $t2, $t2, 2
+	mul $t1, $t0, $t2
+	srl $t1, $t1, 2
+	
+	move $a0, $t1
+	li $v0, 1 #getting the integer input
+	syscall
+	
+
+######################################################################################################
+############################################ PART 5    ###############################################
+######################################################################################################
+.data
+	array: .space 400
+	message: .asciiz "Enter the size of the array: "
+	message2: .asciiz "Enter an integer: "
+	message3: .asciiz "Enter a number for the summation of numbers in the array which is greater than this number: "
+	message4: .asciiz "\n"
+	message5: .asciiz "The sum of even numbers: "
+	message6: .asciiz "The sum of odd numbers: "
+	message7: .asciiz "The sum is: "
+	message8: .asciiz "The number of occurances are: " 
+	command:  .asciiz "Give me a command ! : "
+
+.text
+	
+	start:
+	li $v0, 4
+	la $a0, message # printing message to the user
+	syscall
+	
+	li $v0, 5 #getting the size of the array
+	syscall
+	
+	move $t1, $v0 # $t1 = the size of the array
+	ble $t1, $0, start # control point if the size is declared by 0
+	bgt $t1, 100, start
+	li $t2, 0 # $t2 = #. element of the array
+	la $s0, array # $s0 = the address of the array
+	
+	begin:
+	
+	li $v0, 4
+	la $a0, message2
+	syscall
+	
+	li $v0, 5
+	syscall
+	
+	sw $v0, ($s0)
+	addi $s0, $s0, 4
+	addi $t2, $t2, 1
+	
+	bne $t1, $t2, begin
+	
+	li $v0, 4
+	la $a0, message3
+	syscall
+	
+	li $v0, 5
+	syscall
+	
+	move $s1, $t2 # saving the number of elements
+	move $t3, $v0 # saving the given number
+	la $s0, array # taking the array's first index
+	li $t4, 0 # the sum
+	b sum2
+	
+	sum:
+	add $t4, $t4, $t5 # adds the sum if it is greater
+	sum2:
+	lw $t5, ($s0) # gets the index fron the array
+	addi $s0, $s0, 4 # incrementing the address of the array's pointer
+	subi $t2, $t2, 1 #incrementing the number of elements in the array
+	bltz  $t2, exit # exits when the array is done
+	bgt $t5, $t3, sum # checks if it is greater
+	b sum2
+	
+	exit:
+	
+	la $a0, message7
+	li $v0, 4
+	syscall
+	
+	move $a0, $t4
+	li $v0, 1
+	syscall
+
+	la $a0, message4
+	li $v0, 4
+	syscall
+	
+	#b exit4
+	
+	start3:
+
+	la $s0, array
+	li $t4, 0 # even sum
+	li $t6, 0 # odd sum
+	lw $t5, ($s0) # first integer
+	move $t2, $s1 # loading the number of elements
+	b sum4
+	
+	even:
+	add $t4, $t4, $t5 # adding even sum
+	addi $s0, $s0, 4 # incrementing the address of array
+	subi $t2, $t2, 1 # incrementing the number element of array
+	b sum4
+	odd:
+	add $t6, $t6, $t5 # adding odd sum
+	addi $s0, $s0, 4 # incrementing the address of array
+	subi $t2, $t2, 1 # decrementing the number element of array
+	sum4:
+	
+	lw $t5, ($s0) # getting an input from the arrap
+	
+	andi $t1, $t5, 0x01 # checks if the last bit whether it is divided by 1 or not
+	
+	beqz $t2, exit2
+	beqz $t1, even
+	bnez $t1, odd
+	
+	b sum4
+	
+	exit2:
+	
+	la $a0, message5
+	li $v0, 4
+	syscall
+	
+	move $a0, $t4
+	li $v0, 1
+	syscall
+	
+	la $a0, message4
+	li $v0, 4
+	syscall
+	
+	la $a0, message6
+	li $v0, 4
+	syscall
+	
+	move $a0, $t6
+	li $v0, 1
+	syscall
+	
+	la $a0, message4
+	li $v0, 4
+	syscall
+
+	#b exit4
+	
+	start4:
+
+	li $v0, 4
+	la $a0, message2
+	syscall
+	
+	li $v0, 5
+	syscall
+	
+	move $t1, $v0
+	move $t2, $s1
+	la $s0, array
+	li $t4, 0
+	lw $t5, ($s0) # first integer
+	
+	b division2
+	
+	division:
+	add $t4, $t4, 1 # increments the number of elements which can be divided
+	division2:
+	lw $t5, ($s0) # getting the index from the array
+	addi $s0, $s0, 4 # incrementing the address of array
+	subi $t2, $t2, 1 # decrementing the number of elements in the array
+	rem $t0, $t5, $t1 # saves the remainder's value
+
+	bltz  $t2, exit3 
+	beqz  $t0, division # checks if the remainder is zero or not
+	b division2
+	
+	exit3:
+	
+	la $a0, message4
+	li $v0, 4
+	syscall
+	
+	la $a0, message8
+	li $v0, 4
+	syscall
+	
+	move $a0, $t4
+	li $v0, 1
+	syscall
+	
+	exit4:
